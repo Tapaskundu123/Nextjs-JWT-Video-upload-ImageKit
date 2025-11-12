@@ -21,7 +21,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/profile', '/User/login', '/User/signup']
+  matcher: ['/', '/profile', '/User/login', '/User/signup','/videoUpload']
 };
 
 // 👇 This is the key line
