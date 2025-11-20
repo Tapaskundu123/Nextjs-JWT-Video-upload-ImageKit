@@ -2,7 +2,7 @@ import { connectDB } from "@/lib/mongodb";
 import { User } from "@/models/user.model";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Check if user exists
+    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
@@ -26,34 +26,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Compare plain password with hashed password
+    // Password check
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return NextResponse.json(
         { success: false, message: "Invalid password" },
         { status: 401 }
       );
     }
-    const tokenData=  {
-        id: user._id,
-        email:user.email,
-        password:user.password
-    }
 
-    const token= await jwt.sign({tokenData},process.env.JWT_SECRET_KEY!,{
-                  expiresIn:'1d'  //options
-    })
+    // Create JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET_KEY!,
+      { expiresIn: "1d" }
+    );
 
-    const response= NextResponse.json({ success: true, message: "Login successful" },
-      { status: 200 })
+    // Response with cookie
+    const response = NextResponse.json(
+      { success: true, message: "Login successful" },
+      { status: 200 }
+    );
 
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: false,      // must be false in localhost
+      sameSite: "lax",
+      path: "/",
+    });
 
-      response.cookies.set('token',token,{httpOnly:false});
+    return response;
 
-      return response;
   } catch (error) {
-    console.error("Error in login:", error);
+    console.error("Login API error:", error);
+
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }

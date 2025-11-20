@@ -96,17 +96,6 @@ const UploadExample = () => {
     } catch (err: any) {
       console.error("Upload error:", err);
 
-      // Rollback: delete from ImageKit if it was uploaded (see security note below)
-      if (uploadedFileId) {
-        try {
-          // MOVED: Do this on a server API route, not client (see below)
-          await axios.post("/api/video/rollback", { fileId: uploadedFileId }, { withCredentials: true });
-          console.log("Rolled back: deleted file from ImageKit", uploadedFileId);
-        } catch (deleteErr) {
-          console.error("Failed to delete from ImageKit on rollback", deleteErr);
-        }
-      }
-
       const msg =
         err.response?.data?.message ||
         err.message ||

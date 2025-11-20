@@ -1,7 +1,7 @@
 // app/api/videos/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { Video} from "@/models/video.model";
+import { Video } from "@/models/video.model";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
@@ -21,21 +21,22 @@ const videoCreateSchema = z.object({
 });
 
 // ======================
-// Helper: Get & Verify JWT
+// Helper: Get & Verify JWT using JWT_SECRET_KEY
 // ======================
 function getVerifiedUserId(token: string | undefined) {
   if (!token) return null;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as { id: string };
     return decoded.id;
   } catch (error) {
+    console.log("JWT Verification Failed:", error);
     return null;
   }
 }
 
 // ======================
-// GET: Fetch All Videos (Public or Authenticated)
+// GET: Fetch All Videos
 // ======================
 export async function GET(req: NextRequest) {
   try {
@@ -44,13 +45,12 @@ export async function GET(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
     const userId = getVerifiedUserId(token);
 
-    // Optional: Only show user's own videos if not admin
-    const query = userId ? { userId } : {}; // Remove userId filter if you want public gallery
+    const query = userId ? { userId } : {}; // Show only user's videos if logged in
 
     const videos = await Video.find(query)
       .sort({ createdAt: -1 })
       .lean()
-      .select("-__v"); // Exclude version key
+      .select("-__v");
 
     return NextResponse.json(
       {
@@ -76,7 +76,6 @@ export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("token")?.value;
 
-    // Check token existence
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Unauthorized – No token provided" },
@@ -84,7 +83,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify token
     const userId = getVerifiedUserId(token);
     if (!userId) {
       return NextResponse.json(
@@ -97,7 +95,6 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // Validate with Zod
     const parsed = videoCreateSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -110,10 +107,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, videoUrl, thumbnailUrl, transformation } =
-      parsed.data;
+    const { title, description, videoUrl, thumbnailUrl, transformation } = parsed.data;
 
-    // Prevent duplicate video URLs
+    // Prevent duplicates
     const existing = await Video.findOne({ videoUrl });
     if (existing) {
       return NextResponse.json(
@@ -122,14 +118,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create video with userId
+    // Save video with userId
     const newVideo = await Video.create({
       title,
       description,
       videoUrl,
       thumbnailUrl,
       transformation,
-      userId, // Important: link video to user
+      userId,
     });
 
     return NextResponse.json(
