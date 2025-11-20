@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface FormData {
   name: string;
@@ -11,11 +12,10 @@ interface FormData {
   password: string;
 }
 
-export default function SignUp(){
-    const router= useRouter();
+export default function SignUp() {
+  const router = useRouter();
 
   const [data, setData] = useState<FormData>({
-  
     name: "",
     email: "",
     password: "",
@@ -25,12 +25,14 @@ export default function SignUp(){
     e.preventDefault();
     try {
       const response = await axios.post("/api/user/signup", data);
-      console.log("✅ Response:", response.data);
 
-      router.push('/profile');
+      toast.success("Account created successfully 🎉");
 
-    } catch (error) {
-      console.error("❌ Error:", error);
+      console.log("Response:", response.data);
+      router.push("/profile");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Signup failed ❌");
+      console.error("Error:", error);
     }
   };
 
@@ -95,8 +97,10 @@ export default function SignUp(){
         >
           Submit
         </button>
-        <Link href='/User/login' className="text-black">Login here</Link>
+        <Link href="/User/login" className="text-black">
+          Login here
+        </Link>
       </form>
     </div>
   );
-};
+}

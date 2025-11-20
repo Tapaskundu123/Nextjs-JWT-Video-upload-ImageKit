@@ -2,18 +2,17 @@
 
 import React, { useState, FormEvent } from "react";
 import axios from "axios";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 interface FormData {
-
   email: string;
   password: string;
 }
 
-export default function Login(){
-
-  const router= useRouter();
+export default function Login() {
+  const router = useRouter();
 
   const [data, setData] = useState<FormData>({
     email: "",
@@ -24,12 +23,14 @@ export default function Login(){
     e.preventDefault();
     try {
       const response = await axios.post("/api/user/login", data);
-      console.log("✅ Response:", response.data);
 
-      router.push('/profile');
-    }
-     catch (error) {
-      console.error("❌ Error:", error);
+      toast.success("Login Successful! 🎉");
+
+      console.log("Response:", response.data);
+      router.push("/profile");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Login failed ❌");
+      console.error("Error:", error);
     }
   };
 
@@ -80,8 +81,10 @@ export default function Login(){
           Submit
         </button>
 
-        <Link href='/User/signup' className="text-black">Signup here</Link>
+        <Link href="/User/signup" className="text-black">
+          Signup here
+        </Link>
       </form>
     </div>
   );
-};
+}
