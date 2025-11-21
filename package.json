@@ -16,6 +16,7 @@
     "date-fns": "^4.1.0",
     "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.554.0",
     "mongoose": "^8.19.3",
     "next": "16.0.1",
     "react": "19.2.0",
