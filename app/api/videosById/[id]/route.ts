@@ -4,12 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }  // ← Note the Promise
 ) {
   try {
     await connectDB();
 
-    const { id } = params; // ✅ CORRECT (NO await)
+    const { id } = await params; // ← MUST await here in Next.js 15+
 
     if (!id) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function GET(
       { success: true, message: "Video found", data: video },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
       { success: false, message: "Server error", error: error.message },
       { status: 500 }
