@@ -64,6 +64,5 @@ const Video: Model<IVideo> =
   mongoose.models.Video || mongoose.model<IVideo>("Video", videoSchema);
 
 // Export both named and default
-export type { IVideo };
 export { Video };
 export default Video;
