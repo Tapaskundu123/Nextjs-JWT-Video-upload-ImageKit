@@ -6,15 +6,18 @@ export async function GET() {
 
     response.cookies.set("token", "", {
       httpOnly: true,
-      secure:  process.env.NODE_ENV==="production",  //true in production
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      path: "/",           // Important! clears for all routes
-      expires: new Date(0) // Immediately expire
+      path: "/",
+      expires: new Date(0),
     });
 
     return response;
-  } catch (error) {
-    console.log("Logout error:", error.message);
-    return NextResponse.json({ error: "Logout failed" }, { status: 500 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: "Logout failed", details: error.message || error },
+      { status: 500 }
+    );
   }
 }
+
