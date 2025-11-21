@@ -6,10 +6,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+type User = {
+  email: string;
+  createdAt: string;
+};
+
 export default function ProfilePage() {
   const router = useRouter();
 
-  const [userData, setUserData] = useState(null); // <-- STATE
+  const [userData, setUserData] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
