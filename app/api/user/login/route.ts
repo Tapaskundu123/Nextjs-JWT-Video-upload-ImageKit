@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: false,      // must be false in localhost
+      secure: process.env.NODE_ENV==="production",      // must be false in localhost
       sameSite: "lax",
       path: "/",
     });

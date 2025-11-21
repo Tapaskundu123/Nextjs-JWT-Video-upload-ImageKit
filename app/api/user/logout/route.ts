@@ -6,7 +6,7 @@ export async function GET() {
 
     response.cookies.set("token", "", {
       httpOnly: true,
-      secure: false, //true in production
+      secure:  process.env.NODE_ENV==="production",  //true in production
       sameSite: "strict",
       path: "/",           // Important! clears for all routes
       expires: new Date(0) // Immediately expire

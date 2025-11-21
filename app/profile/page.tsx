@@ -1,56 +1,90 @@
-'use client'
+"use client";
 
 import axios from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { NextResponse } from "next/server";
+import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
+  const router = useRouter();
 
+  const [userData, setUserData] = useState(null); // <-- STATE
 
-    const router= useRouter();
-    const handleLogout= async()=>{
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("/api/user/profileInfo");
+        console.log(res.data);
+        setUserData(res.data.user); // <-- SAVE TO STATE
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-        try {
-            
-            const response= await axios.get('/api/user/logout');
+    fetchData();
+  }, []);
 
-            if(response.status===200){
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get("/api/user/logout");
 
-                router.push('/User/login');
-            }
-        } catch (error) {
-            console.log(error.message);
-            NextResponse.json({success:false,message:"swg"});
-        }
+      if (response.status === 200) {
+        router.push("/User/login");
+      }
+    } catch (error) {
+      console.log(error.message);
     }
+  };
+
+  // If data is loading
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-xl">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100">
       <div className="bg-white rounded-3xl shadow-xl p-8 w-[350px] text-center">
         <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-tr from-indigo-400 to-blue-500 flex items-center justify-center text-white text-3xl font-semibold shadow-md">
-          T
+          {userData.email.charAt(0).toUpperCase()}
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Tapas Kundu</h1>
-        <p className="text-gray-500 text-sm mb-5">tapas@example.com</p>
+        <p className="text-gray-500 text-sm mb-5">{userData.email}</p>
 
         <div className="border-t border-gray-200 my-4"></div>
 
         <div className="space-y-2 text-left text-gray-600">
           <p>
-            <span className="font-medium text-gray-800">Joined:</span> Nov 2025
+            <span className="font-medium text-gray-800">Joined:</span>{" "}
+            {new Date(userData.createdAt).toDateString() || 'none'}
           </p>
+
           <p>
-            <span className="font-medium text-gray-800">Role:</span> Full Stack Developer
+            <span className="font-medium text-gray-800">Role:</span> User
           </p>
+
           <p>
             <span className="font-medium text-gray-800">Location:</span> India 🇮🇳
           </p>
         </div>
 
+        <Link href="/AllVideos">
+  <span className="text-indigo-600 font-semibold hover:underline hover:text-indigo-800">
+    All Videos
+  </span>
+</Link>
         <button className="mt-6 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl transition-all duration-200 shadow-md">
           Edit Profile
         </button>
 
-        <button onClick={handleLogout}>Logout</button>
+        <button
+          onClick={handleLogout}
+          className="mt-3 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition-all duration-200 shadow-md"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
