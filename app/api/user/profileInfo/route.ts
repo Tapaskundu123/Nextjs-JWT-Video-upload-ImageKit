@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       message: "User found successfully",
       user: userData,
     });
-  } catch (error) {
+  } catch (error:any) {
     console.error("ERROR:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },

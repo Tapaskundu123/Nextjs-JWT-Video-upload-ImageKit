@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,8 +17,9 @@ export default function ProfilePage() {
         const res = await axios.get("/api/user/profileInfo");
         console.log(res.data);
         setUserData(res.data.user); // <-- SAVE TO STATE
-      } catch (err) {
+      } catch (err:any) {
         console.error(err);
+        toast.error(err);
       }
     };
 
@@ -31,8 +33,9 @@ export default function ProfilePage() {
       if (response.status === 200) {
         router.push("/User/login");
       }
-    } catch (error) {
+    } catch (error:any) {
       console.log(error.message);
+      toast.error(error.message);
     }
   };
 
